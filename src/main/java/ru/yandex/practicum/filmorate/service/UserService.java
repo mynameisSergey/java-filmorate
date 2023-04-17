@@ -3,75 +3,77 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.User.UserStorage;
+import ru.yandex.practicum.filmorate.storage.dao.friend.FriendDao;
+import ru.yandex.practicum.filmorate.storage.dao.user.UserDao;
 
-
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class UserService {
 
-    final UserStorage userStorage;
+    private final UserDao userDao;
+    private final FriendDao friendDao;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserService(UserDao userDao, FriendDao friendDao) {
+        this.userDao = userDao;
+        this.friendDao = friendDao;
     }
 
     public void addFriend(int userID, int friendID) {
-        User user = getUserById(userID);
-        User friend = getUserById(friendID);
-
-        user.addFriend(friend);
-        friend.addFriend(user);
+        checkUser(userID);
+        checkUser(friendID);
+        friendDao.addFriend(userID, friendID);
     }
 
     public void deleteFriend(int userID, int friendID) {
-        User user = getUserById(userID);
-        User friend = getUserById(friendID);
-
-        user.removeFriend(friend);
-        friend.removeFriend(user);
+        checkUser(userID);
+        checkUser(friendID);
+        friendDao.deleteFriend(userID, friendID);
     }
 
-    public Set<User> showCommonFriends(int userID, int otherUserID) {
-        User user = getUserById(userID);
-        User otherUser = getUserById(otherUserID);
+    public List<User> showCommonFriends(int userID, int friendID) {
+        checkUser(userID);
+        checkUser(friendID);
+        List<User> user = showFriends(userID);
+        List<User> friend = showFriends(friendID);
+        user.retainAll(friend);
+        return user;
+    }
 
-        Set<User> users = new HashSet<>(user.getFriends());
-        users.retainAll(otherUser.getFriends());
+    public List<User> showFriends(int userID) {
+        checkUser(userID);
+        List<Integer> friendId = friendDao.showFriendsById(userID);
+        List<User> users = new ArrayList<>();
+        for (int id : friendId) {
+            checkUser(id);
+            users.add(userDao.showUserById(id));
+        }
         return users;
     }
 
-    public Set<User> showFriends(int userID) {
-        User user = getUserById(userID);
-
-        return user.getFriends();
-    }
-
     public List<User> showUsers() {
-        return userStorage.getUsers();
+        return userDao.showUsers();
     }
 
     public User showUserById(int id) {
-        return userStorage.findUserById(id);
+        return userDao.showUserById(id);
     }
 
     public User addUser(User user) {
-        return userStorage.addUser(user);
+        return userDao.addUser(user);
     }
 
     public User changeUser(User user) {
-        return userStorage.changeUser(user);
+        return userDao.changeUser(user);
     }
 
     public void deleteUserById(int id) {
-        userStorage.deleteUserById(id);
+        userDao.deleteUserById(id);
     }
 
-    public User getUserById(int id) {
-        return userStorage.findUserById(id);
+    private void checkUser(int userId) {
+        showUserById(userId);
     }
 }

@@ -1,41 +1,40 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Film {
     private int id;
-
+    @NotNull(message = "Film name cannot be not null")
     @NotEmpty(message = "Film name cannot be not empty")
+    @NotBlank(message = "Film name cannot be not blank")
     private String name;
-
     @NotEmpty
     @Size(max = 200, message = "Film description must be less than 200 characters.")
     private String description;
-
     private LocalDate releaseDate;
-
     @Min(value = 0L, message = "Film duration must be more that 0")
     private long duration;
-    @JsonIgnore
-    private final Map<User, Integer> likes = new HashMap<>();
+    @NotNull(message = "Film need to be rated")
+    private Mpa mpa;
+    private Set<Genre> genres = new HashSet<>();
 
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Film film = (Film) o;
-
         return id == film.id;
     }
 
@@ -44,15 +43,4 @@ public class Film {
         return id;
     }
 
-    public void addLike(User user) { // добавить лайк
-        likes.put(user, 0);
-    }
-
-    public void deleteLike(User user) { // удалить лайк
-        likes.remove(user);
-    }
-
-    public Integer showAmountLikes() { // показать количество лайков
-        return getLikes().size();
-    }
 }

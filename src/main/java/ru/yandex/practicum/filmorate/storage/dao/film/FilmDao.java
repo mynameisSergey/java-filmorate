@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.Film;
+package ru.yandex.practicum.filmorate.storage.dao.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -6,11 +6,11 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.List;
 
 @Component
-public interface FilmStorage {
+public interface FilmDao {
 
-    Film findFilmById(int id);
+    Film showFilmById(int id);
 
-    List<Film> getFilms();
+    List<Film> showFilms();
 
     Film addFilm(Film film);
 
